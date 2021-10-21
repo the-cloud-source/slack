@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/bluele/slack"
+	"github.com/the-cloud-source/slack"
 )
 
 const (

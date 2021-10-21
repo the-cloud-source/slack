@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/bluele/slack"
+	"github.com/the-cloud-source/slack"
 )
 
 // Please change these values to suit your environment

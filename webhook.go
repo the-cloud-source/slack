@@ -6,10 +6,15 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type WebHook struct {
 	hookURL string
+
+	hook  string
+	proxy string
+	host  string
 }
 
 type WebHookPostPayload struct {
@@ -27,12 +32,46 @@ func NewWebHook(hookURL string) *WebHook {
 	return &WebHook{hookURL}
 }
 
+func NewWebHookProxy(hookUrl, proxy string) (*WebHook, error) {
+
+	h, err := url.Parse(hookUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := url.Parse(hookUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	proxied = h
+	proxied.Scheme = p.Scheme
+	proxied.Host = p.Host
+
+	wh := &WebHook{
+		hookURL: proxied.String(),
+		hook:    hookUrl,
+		proxy:   proxy,
+		host:    h.Hostname(),
+	}
+
+	wh.hookURL = proxied.String()
+	return wh, nil
+}
+
 func (hk *WebHook) PostMessage(payload *WebHookPostPayload) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
+
 	}
-	resp, err := http.Post(hk.hookURL, "application/json", bytes.NewReader(body))
+
+	req, err := http.NewRequest("POST", URL, bytes.NewReader(body))
+	req.Host = hk.Host
+	req.Header.Add("User-Agent", "go-slack/v1")
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := httpClientWH.Do(req)
 	if err != nil {
 		return err
 	}
@@ -44,4 +83,13 @@ func (hk *WebHook) PostMessage(payload *WebHookPostPayload) error {
 	}
 
 	return nil
+}
+
+var httpClientWH = &http.Client{
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	},
+	Timeout: 60 * time.Second,
 }
