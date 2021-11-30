@@ -45,7 +45,7 @@ func NewWebHookProxy(hookURL, proxy string) (*WebHook, error) {
 		return nil, err
 	}
 
-	p, err := url.Parse(hookURL)
+	p, err := url.Parse(proxy)
 	if err != nil {
 		return nil, err
 	}
