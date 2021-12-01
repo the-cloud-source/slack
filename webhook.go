@@ -50,7 +50,7 @@ func NewWebHookProxy(hookURL, proxy string) (*WebHook, error) {
 		return nil, err
 	}
 
-	proxied := h
+	proxied := *h
 	proxied.Scheme = p.Scheme
 	proxied.Host = p.Host
 
@@ -60,8 +60,6 @@ func NewWebHookProxy(hookURL, proxy string) (*WebHook, error) {
 		proxy:   proxy,
 		host:    h.Hostname(),
 	}
-
-	wh.hookURL = proxied.String()
 	return wh, nil
 }
 
